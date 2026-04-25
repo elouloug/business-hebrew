@@ -1,0 +1,2209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <title>Lexicon — Business Hebrew</title>
+  <meta name="description" content="Drill professional Hebrew vocabulary: business, M&amp;A, cybersecurity, tech, program management." />
+
+  <!-- PWA: installable to iOS / Android home screen -->
+  <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjogIkxleGljb24gXHUyMDE0IEJ1c2luZXNzIEhlYnJldyIsICJzaG9ydF9uYW1lIjogIkxleGljb24iLCAiZGVzY3JpcHRpb24iOiAiUHJvZmVzc2lvbmFsIEhlYnJldyB2b2NhYnVsYXJ5IGRyaWxsIiwgInN0YXJ0X3VybCI6ICIuLyIsICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLCAib3JpZW50YXRpb24iOiAicG9ydHJhaXQiLCAiYmFja2dyb3VuZF9jb2xvciI6ICIjRjdGMUU1IiwgInRoZW1lX2NvbG9yIjogIiMxRjFBMTQiLCAiaWNvbnMiOiBbeyJzcmMiOiAiLi9pY29uLTE5Mi5wbmciLCAic2l6ZXMiOiAiMTkyeDE5MiIsICJ0eXBlIjogImltYWdlL3BuZyJ9LCB7InNyYyI6ICIuL2ljb24tNTEyLnBuZyIsICJzaXplcyI6ICI1MTJ4NTEyIiwgInR5cGUiOiAiaW1hZ2UvcG5nIiwgInB1cnBvc2UiOiAiYW55IG1hc2thYmxlIn1dfQ==" />
+  <meta name="theme-color" content="#1F1A14" />
+
+  <!-- iOS home-screen icon + standalone behavior -->
+  <link rel="apple-touch-icon" href="./icon-180.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Lexicon" />
+
+  <!-- Regular favicon -->
+  <link rel="icon" type="image/png" href="./icon-192.png" />
+
+  <!-- Prevent iOS from auto-adjusting font sizes on rotation -->
+  <style>
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: #F7F1E5;
+      /* Respect iOS safe areas when installed as PWA */
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
+    #root { min-height: 100vh; }
+    /* Initial loading state before React mounts */
+    .boot {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Georgia, serif;
+      color: #A89A7E;
+      font-size: 20px;
+    }
+  </style>
+
+  <!-- React + Babel Standalone (compiles JSX in-browser) -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"><div class="boot">טוען…</div></div>
+
+  <script type="text/babel" data-presets="react" data-type="module">
+
+// Destructure React hooks from the global React (loaded via CDN)
+const { useState, useEffect, useMemo, useRef } = React;
+
+// Shim window.storage to use localStorage so the app persists state
+// across sessions when deployed as a static site.
+window.storage = {
+  async get(key) {
+    const v = localStorage.getItem(key);
+    return v !== null ? { value: v } : null;
+  },
+  async set(key, value) {
+    localStorage.setItem(key, value);
+    return { value };
+  },
+  async delete(key) {
+    localStorage.removeItem(key);
+    return { deleted: true };
+  }
+};
+
+// ============================================================
+// VOCABULARY — 155 words across 6 professional domains
+// Each word has: he (plain, used for typing match), heN (with nikud
+// for display), tr (transliteration for pronunciation), en, cat
+// ============================================================
+const WORDS = [
+  // BUSINESS / CONSULTING
+  { id: "b01", he: "לקוח", heN: "לָקוֹחַ", tr: "lakó'akh", en: "client", cat: "business" },
+  { id: "b02", he: "פגישה", heN: "פְּגִישָׁה", tr: "pgishá", en: "meeting", cat: "business" },
+  { id: "b03", he: "הצעה", heN: "הַצָּעָה", tr: "hatza'á", en: "proposal", cat: "business" },
+  { id: "b04", he: "אסטרטגיה", heN: "אֶסְטְרָטֶגְיָה", tr: "estrategya", en: "strategy", cat: "business" },
+  { id: "b05", he: "יעדים", heN: "יְעָדִים", tr: "ye'adím", en: "goals / targets", cat: "business" },
+  { id: "b06", he: "תקציב", heN: "תַּקְצִיב", tr: "taktzív", en: "budget", cat: "business" },
+  { id: "b07", he: "תוצרים", heN: "תּוֹצָרִים", tr: "totzarím", en: "deliverables", cat: "business" },
+  { id: "b08", he: "ניתוח", heN: "נִתּוּחַ", tr: "nitú'akh", en: "analysis", cat: "business" },
+  { id: "b09", he: "המלצה", heN: "הַמְלָצָה", tr: "hamlatzá", en: "recommendation", cat: "business" },
+  { id: "b10", he: "מצגת", heN: "מַצָּגֶת", tr: "matzéget", en: "presentation", cat: "business" },
+  { id: "b11", he: "דיון", heN: "דִּיּוּן", tr: "diyún", en: "discussion", cat: "business" },
+  { id: "b12", he: "החלטה", heN: "הַחְלָטָה", tr: "hakhlatá", en: "decision", cat: "business" },
+  { id: "b13", he: "משימה", heN: "מְשִׂימָה", tr: "mesimá", en: "task", cat: "business" },
+  { id: "b14", he: "אחריות", heN: "אַחְרָיוּת", tr: "akhrayút", en: "responsibility", cat: "business" },
+  { id: "b15", he: "צוות", heN: "צֶוֶת", tr: "tzévet", en: "team", cat: "business" },
+  { id: "b16", he: "ייעוץ", heN: "יִעוּץ", tr: "yi'útz", en: "consulting", cat: "business" },
+  { id: "b17", he: "חוזה", heN: "חוֹזֶה", tr: "khozé", en: "contract", cat: "business" },
+  { id: "b18", he: "הסכם", heN: "הֶסְכֵּם", tr: "heském", en: "agreement", cat: "business" },
+  { id: "b19", he: "ועדת היגוי", heN: "וַעֲדַת הִגּוּי", tr: "va'adát higúy", en: "steering committee", cat: "business" },
+  { id: "b20", he: "הסלמה", heN: "הַסְלָמָה", tr: "haslamá", en: "escalation", cat: "business" },
+  { id: "b21", he: "מדדים", heN: "מַדָּדִים", tr: "madadím", en: "metrics / KPIs", cat: "business" },
+  { id: "b22", he: "תחזית", heN: "תַּחֲזִית", tr: "takhazít", en: "forecast", cat: "business" },
+  { id: "b23", he: "סקירה", heN: "סְקִירָה", tr: "skirá", en: "review", cat: "business" },
+  { id: "b24", he: "לקוח פוטנציאלי", heN: "לָקוֹחַ פּוֹטֶנְצְיָאלִי", tr: "lakó'akh potentziáli", en: "prospect", cat: "business" },
+  { id: "b25", he: "תוצאות", heN: "תּוֹצָאוֹת", tr: "totza'ót", en: "results / outcomes", cat: "business" },
+
+  // M&A / FINANCE / TRANSACTIONS
+  { id: "m01", he: "מיזוג", heN: "מִזּוּג", tr: "mizúg", en: "merger", cat: "ma" },
+  { id: "m02", he: "רכישה", heN: "רְכִישָׁה", tr: "rekhishá", en: "acquisition", cat: "ma" },
+  { id: "m03", he: "בדיקת נאותות", heN: "בְּדִיקַת נָאוֹתוּת", tr: "bdikát na'otút", en: "due diligence", cat: "ma" },
+  { id: "m04", he: "שווי", heN: "שׁוֹוִי", tr: "shoví", en: "valuation", cat: "ma" },
+  { id: "m05", he: "עסקה", heN: "עִסְקָה", tr: "iská", en: "deal / transaction", cat: "ma" },
+  { id: "m06", he: "משקיע", heN: "מַשְׁקִיעַ", tr: "mashkí'a", en: "investor", cat: "ma" },
+  { id: "m07", he: "בעלי מניות", heN: "בַּעֲלֵי מְנָיוֹת", tr: "ba'alé menayót", en: "shareholders", cat: "ma" },
+  { id: "m08", he: "הון", heN: "הוֹן", tr: "hon", en: "capital", cat: "ma" },
+  { id: "m09", he: "הכנסות", heN: "הַכְנָסוֹת", tr: "hakhnasót", en: "revenue", cat: "ma" },
+  { id: "m10", he: "רווח", heN: "רֶוַח", tr: "révakh", en: "profit", cat: "ma" },
+  { id: "m11", he: "הוצאות", heN: "הוֹצָאוֹת", tr: "hotza'ót", en: "expenses", cat: "ma" },
+  { id: "m12", he: "סינרגיה", heN: "סִינֶרְגְיָה", tr: "sinérgya", en: "synergy", cat: "ma" },
+  { id: "m13", he: "אינטגרציה", heN: "אִינְטֶגְרַצְיָה", tr: "integrátzya", en: "integration", cat: "ma" },
+  { id: "m14", he: "קרן", heN: "קֶרֶן", tr: "kéren", en: "fund", cat: "ma" },
+  { id: "m15", he: "תזרים מזומנים", heN: "תִּזְרִים מְזוּמָנִים", tr: "tizrím mezumaním", en: "cash flow", cat: "ma" },
+  { id: "m16", he: "הנפקה", heN: "הַנְפָּקָה", tr: "hanpaká", en: "IPO / issuance", cat: "ma" },
+  { id: "m17", he: "מאזן", heN: "מַאֲזָן", tr: "ma'azán", en: "balance sheet", cat: "ma" },
+  { id: "m18", he: "רווח והפסד", heN: "רֶוַח וְהֶפְסֵד", tr: "révakh ve-hefséd", en: "P&L statement", cat: "ma" },
+  { id: "m19", he: "מוניטין", heN: "מוֹנִיטִין", tr: "monitín", en: "goodwill", cat: "ma" },
+  { id: "m20", he: "הון חוזר", heN: "הוֹן חוֹזֵר", tr: "hon khozér", en: "working capital", cat: "ma" },
+  { id: "m21", he: "מכפיל", heN: "מַכְפִּיל", tr: "makhpíl", en: "valuation multiple", cat: "ma" },
+  { id: "m22", he: "הסכם סודיות", heN: "הֶסְכֵּם סוֹדִיּוּת", tr: "heském sodiyút", en: "NDA", cat: "ma" },
+  { id: "m23", he: "מכתב כוונות", heN: "מִכְתַּב כַּוָּנוֹת", tr: "mikhtáv kavanót", en: "letter of intent (LOI)", cat: "ma" },
+  { id: "m24", he: "התחייבויות", heN: "הִתְחַיְּבֻיּוֹת", tr: "hitkhayvuyót", en: "liabilities", cat: "ma" },
+  { id: "m25", he: "הצעת רכש", heN: "הַצָּעַת רֶכֶשׁ", tr: "hatza'át rékhesh", en: "tender offer", cat: "ma" },
+
+  // CYBERSECURITY
+  { id: "c01", he: "אבטחת מידע", heN: "אַבְטָחַת מֵידַע", tr: "avtakhát meidá", en: "information security", cat: "cyber" },
+  { id: "c02", he: "תקיפה", heN: "תְּקִיפָה", tr: "tkifá", en: "attack", cat: "cyber" },
+  { id: "c03", he: "פריצה", heN: "פְּרִיצָה", tr: "pritzá", en: "breach / hack", cat: "cyber" },
+  { id: "c04", he: "כופרה", heN: "כּוֹפְרָה", tr: "kofrá", en: "ransomware", cat: "cyber" },
+  { id: "c05", he: "חולשה", heN: "חֻלְשָׁה", tr: "khulshá", en: "vulnerability", cat: "cyber" },
+  { id: "c06", he: "איום", heN: "אִיּוּם", tr: "iyúm", en: "threat", cat: "cyber" },
+  { id: "c07", he: "סיכון", heN: "סִכּוּן", tr: "sikún", en: "risk", cat: "cyber" },
+  { id: "c08", he: "תגובה לאירועים", heN: "תְּגוּבָה לְאֵרוּעִים", tr: "tguvá le-eru'ím", en: "incident response", cat: "cyber" },
+  { id: "c09", he: "יום אפס", heN: "יוֹם אֶפֶס", tr: "yom éfes", en: "zero-day", cat: "cyber" },
+  { id: "c10", he: "פישינג", heN: "פִישִׁינְג", tr: "físhing", en: "phishing", cat: "cyber" },
+  { id: "c11", he: "הצפנה", heN: "הַצְפָּנָה", tr: "hatzpaná", en: "encryption", cat: "cyber" },
+  { id: "c12", he: "אימות", heN: "אִמּוּת", tr: "imút", en: "authentication", cat: "cyber" },
+  { id: "c13", he: "חדירה", heN: "חֲדִירָה", tr: "khadirá", en: "intrusion", cat: "cyber" },
+  { id: "c14", he: "צוות אדום", heN: "צֶוֶת אָדֹם", tr: "tzévet adóm", en: "red team", cat: "cyber" },
+  { id: "c15", he: "דלף מידע", heN: "דֶּלֶף מֵידַע", tr: "délef meidá", en: "data leak", cat: "cyber" },
+  { id: "c16", he: "תוכנה זדונית", heN: "תּוֹכְנָה זְדוֹנִית", tr: "tokhná zedonít", en: "malware", cat: "cyber" },
+  { id: "c17", he: "חומת אש", heN: "חוֹמַת אֵשׁ", tr: "khomát esh", en: "firewall", cat: "cyber" },
+  { id: "c18", he: "גיבוי", heN: "גִּבּוּי", tr: "gibúy", en: "backup", cat: "cyber" },
+  { id: "c19", he: "תיקון", heN: "תִּקּוּן", tr: "tikún", en: "patch", cat: "cyber" },
+  { id: "c20", he: "ניטור", heN: "נִטּוּר", tr: "nitúr", en: "monitoring", cat: "cyber" },
+  { id: "c21", he: "ניתוח פורנזי", heN: "נִתּוּחַ פוֹרֶנְזִי", tr: "nitú'akh forénzi", en: "forensic analysis", cat: "cyber" },
+  { id: "c22", he: "הנדסה חברתית", heN: "הַנְדָּסָה חֶבְרָתִית", tr: "handasá khevratít", en: "social engineering", cat: "cyber" },
+  { id: "c23", he: "בקרת גישה", heN: "בַּקָּרַת גִּישָׁה", tr: "bakarát gishá", en: "access control", cat: "cyber" },
+  { id: "c24", he: "ציד איומים", heN: "צֵיד אִיּוּמִים", tr: "tzeid iyumím", en: "threat hunting", cat: "cyber" },
+  { id: "c25", he: "דלת אחורית", heN: "דֶּלֶת אֲחוֹרִית", tr: "délet akhorít", en: "backdoor", cat: "cyber" },
+  { id: "c26", he: "מרכז תפעול אבטחה", heN: "מֶרְכַּז תִּפְעוּל אַבְטָחָה", tr: "merkáz tif'úl avtakhá", en: "SOC", cat: "cyber" },
+  { id: "c27", he: "מניעת אובדן מידע", heN: "מְנִיעַת אָבְדַן מֵידַע", tr: "meni'át ovdán meidá", en: "DLP", cat: "cyber" },
+  { id: "c28", he: "האקר", heN: "הָאקֶר", tr: "háker", en: "hacker", cat: "cyber" },
+  { id: "c29", he: "תוכנת ריגול", heN: "תּוֹכְנַת רִגּוּל", tr: "tokhnát rigúl", en: "spyware", cat: "cyber" },
+  { id: "c30", he: "גניבת זהות", heN: "גְּנֵבַת זֶהוּת", tr: "gnevát zehút", en: "identity theft", cat: "cyber" },
+
+  // TECH / PRODUCT
+  { id: "t01", he: "פיתוח", heN: "פִּתּוּחַ", tr: "pitú'akh", en: "development", cat: "tech" },
+  { id: "t02", he: "תשתית", heN: "תַּשְׁתִּית", tr: "tashtít", en: "infrastructure", cat: "tech" },
+  { id: "t03", he: "ענן", heN: "עָנָן", tr: "anán", en: "cloud", cat: "tech" },
+  { id: "t04", he: "מערכת", heN: "מַעֲרֶכֶת", tr: "ma'arékhet", en: "system", cat: "tech" },
+  { id: "t05", he: "אפיון", heN: "אִפְיוּן", tr: "ifyún", en: "specification", cat: "tech" },
+  { id: "t06", he: "תקלה", heN: "תַּקָּלָה", tr: "takalá", en: "bug / malfunction", cat: "tech" },
+  { id: "t07", he: "שחרור", heN: "שִׁחְרוּר", tr: "shikhrúr", en: "release", cat: "tech" },
+  { id: "t08", he: "גרסה", heN: "גִּרְסָה", tr: "girsá", en: "version", cat: "tech" },
+  { id: "t09", he: "משתמש", heN: "מִשְׁתַּמֵּשׁ", tr: "mishtamésh", en: "user", cat: "tech" },
+  { id: "t10", he: "ממשק", heN: "מִמְשָׁק", tr: "mimshák", en: "interface", cat: "tech" },
+  { id: "t11", he: "שרת", heN: "שָׁרָת", tr: "sharát", en: "server", cat: "tech" },
+  { id: "t12", he: "קוד", heN: "קוֹד", tr: "kod", en: "code", cat: "tech" },
+  { id: "t13", he: "מסד נתונים", heN: "מַסַּד נְתוּנִים", tr: "masád netuním", en: "database", cat: "tech" },
+  { id: "t14", he: "תכונה", heN: "תְּכוּנָה", tr: "tkhuná", en: "feature", cat: "tech" },
+  { id: "t15", he: "בדיקות", heN: "בְּדִיקוֹת", tr: "bdikót", en: "testing", cat: "tech" },
+  { id: "t16", he: "ארכיטקטורה", heN: "אַרְכִיטֶקְטוּרָה", tr: "arkhitektúra", en: "architecture", cat: "tech" },
+  { id: "t17", he: "אוטומציה", heN: "אוֹטוֹמַצְיָה", tr: "otomátzya", en: "automation", cat: "tech" },
+  { id: "t18", he: "סקרום", heN: "סְקְרָם", tr: "skram", en: "Scrum", cat: "tech" },
+  { id: "t19", he: "ספרינט", heN: "סְפְּרִינְט", tr: "sprint", en: "sprint", cat: "tech" },
+  { id: "t20", he: "אב-טיפוס", heN: "אַב־טִיפּוּס", tr: "av-tipús", en: "prototype", cat: "tech" },
+  { id: "t21", he: "דרישות", heN: "דְּרִישׁוֹת", tr: "drishót", en: "requirements", cat: "tech" },
+  { id: "t22", he: "פריסה", heN: "פְּרִיסָה", tr: "prisá", en: "deployment", cat: "tech" },
+  { id: "t23", he: "לוח מחוונים", heN: "לוּחַ מַחְוָנִים", tr: "lú'akh makhvaním", en: "dashboard", cat: "tech" },
+  { id: "t24", he: "מיקרו-שירותים", heN: "מִיקְרוֹ־שֵׁרוּתִים", tr: "míkro-sherutím", en: "microservices", cat: "tech" },
+  { id: "t25", he: "קוד פתוח", heN: "קוֹד פָּתוּחַ", tr: "kod patú'akh", en: "open source", cat: "tech" },
+
+  // PROJECT / PROGRAM MANAGEMENT
+  { id: "p01", he: "ניהול פרויקטים", heN: "נִהוּל פְּרוֹיֶקְטִים", tr: "nihúl proyéktim", en: "project management", cat: "pm" },
+  { id: "p02", he: "לוח זמנים", heN: "לוּחַ זְמַנִּים", tr: "lú'akh zmaním", en: "schedule / timeline", cat: "pm" },
+  { id: "p03", he: "מועד יעד", heN: "מוֹעֵד יַעַד", tr: "mo'éd ya'ád", en: "deadline", cat: "pm" },
+  { id: "p04", he: "אבן דרך", heN: "אֶבֶן דֶּרֶךְ", tr: "éven dérekh", en: "milestone", cat: "pm" },
+  { id: "p05", he: "משאבים", heN: "מַשְׁאַבִּים", tr: "mash'abím", en: "resources", cat: "pm" },
+  { id: "p06", he: "בעלי עניין", heN: "בַּעֲלֵי עִנְיָן", tr: "ba'alé inyán", en: "stakeholders", cat: "pm" },
+  { id: "p07", he: "סטטוס", heN: "סְטָטוּס", tr: "státus", en: "status", cat: "pm" },
+  { id: "p08", he: "התקדמות", heN: "הִתְקַדְּמוּת", tr: "hitkadmút", en: "progress", cat: "pm" },
+  { id: "p09", he: "עיכוב", heN: "עִכּוּב", tr: "ikúv", en: "delay", cat: "pm" },
+  { id: "p10", he: "היקף", heN: "הֶקֵּף", tr: "hekéf", en: "scope", cat: "pm" },
+  { id: "p11", he: "איכות", heN: "אֵיכוּת", tr: "eikhút", en: "quality", cat: "pm" },
+  { id: "p12", he: "יישום", heN: "יִשּׂוּם", tr: "yisúm", en: "implementation", cat: "pm" },
+  { id: "p13", he: "תלות", heN: "תְּלוּת", tr: "tlut", en: "dependency", cat: "pm" },
+  { id: "p14", he: "דיווח", heN: "דִּוּוּחַ", tr: "divú'akh", en: "reporting", cat: "pm" },
+  { id: "p15", he: "סיכום", heN: "סִכּוּם", tr: "sikúm", en: "summary / wrap-up", cat: "pm" },
+  { id: "p16", he: "תוכנית עבודה", heN: "תָּכְנִית עֲבוֹדָה", tr: "tokhnít avodá", en: "work plan", cat: "pm" },
+  { id: "p17", he: "ניהול סיכונים", heN: "נִהוּל סִכּוּנִים", tr: "nihúl sikuním", en: "risk management", cat: "pm" },
+  { id: "p18", he: "מפת דרכים", heN: "מַפַּת דְּרָכִים", tr: "mapát drakhím", en: "roadmap", cat: "pm" },
+  { id: "p19", he: "ניהול שינויים", heN: "נִהוּל שִׁנּוּיִים", tr: "nihúl shinuyím", en: "change management", cat: "pm" },
+  { id: "p20", he: "קליטה", heN: "קְלִיטָה", tr: "klitá", en: "onboarding", cat: "pm" },
+  { id: "p21", he: "תעדוף", heN: "תִּעְדּוּף", tr: "ti'edúf", en: "prioritization", cat: "pm" },
+  { id: "p22", he: "פגם", heN: "פְּגָם", tr: "pgam", en: "defect", cat: "pm" },
+  { id: "p23", he: "אישור", heN: "אִשּׁוּר", tr: "ishúr", en: "approval", cat: "pm" },
+  { id: "p24", he: "חסם", heN: "חֶסֶם", tr: "khésem", en: "blocker", cat: "pm" },
+  { id: "p25", he: "בקרה", heN: "בַּקָּרָה", tr: "bakará", en: "control / oversight", cat: "pm" },
+
+  // NEWS / CURRENT AFFAIRS
+  { id: "n01", he: "ממשלה", heN: "מֶמְשָׁלָה", tr: "memshalá", en: "government", cat: "news" },
+  { id: "n02", he: "כנסת", heN: "כְּנֶסֶת", tr: "knéset", en: "Knesset", cat: "news" },
+  { id: "n03", he: "ראש ממשלה", heN: "רֹאשׁ מֶמְשָׁלָה", tr: "rosh memshalá", en: "prime minister", cat: "news" },
+  { id: "n04", he: "שר", heN: "שַׂר", tr: "sar", en: "minister (government)", cat: "news" },
+  { id: "n05", he: "בחירות", heN: "בְּחִירוֹת", tr: "bekhirót", en: "elections", cat: "news" },
+  { id: "n06", he: "חקיקה", heN: "חֲקִיקָה", tr: "khakiká", en: "legislation", cat: "news" },
+  { id: "n07", he: "כתב", heN: "כַּתָּב", tr: "katáv", en: "reporter / correspondent", cat: "news" },
+  { id: "n08", he: "כותרת", heN: "כּוֹתֶרֶת", tr: "kotéret", en: "headline", cat: "news" },
+  { id: "n09", he: "פרשנות", heN: "פַּרְשָׁנוּת", tr: "parshanút", en: "analysis / commentary", cat: "news" },
+  { id: "n10", he: "דובר", heN: "דּוֹבֵר", tr: "dovér", en: "spokesperson", cat: "news" },
+  { id: "n11", he: "הודעה", heN: "הוֹדָעָה", tr: "hoda'á", en: "statement / announcement", cat: "news" },
+  { id: "n12", he: "משא ומתן", heN: "מַשָּׂא וּמַתָּן", tr: "masá u-matán", en: "negotiations", cat: "news" },
+  { id: "n13", he: "ביטחון", heN: "בִּטָּחוֹן", tr: "bitakhón", en: "security (national)", cat: "news" },
+  { id: "n14", he: "אינפלציה", heN: "אִינְפְלַצְיָה", tr: "inflátzya", en: "inflation", cat: "news" },
+  { id: "n15", he: "ריבית", heN: "רִבִּית", tr: "ribít", en: "interest rate", cat: "news" },
+  { id: "n16", he: "גירעון", heN: "גֵּרָעוֹן", tr: "gera'ón", en: "deficit", cat: "news" },
+  { id: "n17", he: "בית משפט", heN: "בֵּית מִשְׁפָּט", tr: "beit mishpát", en: "court", cat: "news" },
+  { id: "n18", he: "פסק דין", heN: "פְּסַק דִּין", tr: "psak din", en: "verdict / ruling", cat: "news" },
+  { id: "n19", he: "חקירה", heN: "חֲקִירָה", tr: "khakirá", en: "investigation", cat: "news" },
+  { id: "n20", he: "מינוי", heN: "מִנּוּי", tr: "minúy", en: "appointment (to role)", cat: "news" },
+  { id: "n21", he: "הפגנה", heN: "הַפְגָּנָה", tr: "hafganá", en: "demonstration / protest", cat: "news" },
+  { id: "n22", he: "שגריר", heN: "שַׁגְרִיר", tr: "shagrír", en: "ambassador", cat: "news" },
+  { id: "n23", he: "האום", heN: "הָאוּ\"ם", tr: "ha-úm", en: "UN (United Nations)", cat: "news" },
+  { id: "n24", he: "יחסים", heN: "יְחָסִים", tr: "yekhasím", en: "relations", cat: "news" },
+  { id: "n25", he: "רגולציה", heN: "רֶגוּלַצְיָה", tr: "regulátzya", en: "regulation", cat: "news" },
+];
+
+const CATEGORIES = [
+  { id: "business", label: "Business", he: "עסקים" },
+  { id: "ma", label: "M&A", he: "עסקאות" },
+  { id: "cyber", label: "Cybersecurity", he: "סייבר" },
+  { id: "tech", label: "Tech", he: "טכנולוגיה" },
+  { id: "pm", label: "Program Mgmt", he: "ניהול" },
+  { id: "news", label: "News", he: "חדשות" },
+];
+
+const SESSION_SIZE = 10;
+const STORAGE_KEY = "hebrew_state_v1";
+
+// ============================================================
+// STORAGE HELPERS
+// ============================================================
+const defaultState = () => ({
+  progress: {}, // { wordId: { seen, correct, streak, lastSeen } }
+  stats: { xp: 0, streak: 0, lastDate: null, sessionsDone: 0 },
+  settings: { cats: CATEGORIES.map((c) => c.id), mode: "type" },
+  customWords: [], // user-added words, same shape as WORDS entries
+});
+
+async function loadState() {
+  try {
+    const r = await window.storage.get(STORAGE_KEY);
+    if (r && r.value) return { ...defaultState(), ...JSON.parse(r.value) };
+  } catch (e) {}
+  return defaultState();
+}
+
+async function saveState(s) {
+  try {
+    await window.storage.set(STORAGE_KEY, JSON.stringify(s));
+  } catch (e) {}
+}
+
+// Pick SESSION_SIZE words, weighted toward less-mastered
+function buildQueue(words, progress) {
+  const scored = words.map((w) => {
+    const p = progress[w.id] || { seen: 0, correct: 0, streak: 0 };
+    // Lower score = higher priority. New words are highest priority.
+    const masteryScore = p.seen === 0 ? -100 : p.streak - Math.random() * 2;
+    return { w, score: masteryScore };
+  });
+  scored.sort((a, b) => a.score - b.score);
+  return scored.slice(0, SESSION_SIZE).map((s) => s.w);
+}
+
+function todayStr() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+// ============================================================
+// MAIN APP
+// ============================================================
+function App() {
+  const [loaded, setLoaded] = useState(false);
+  const [state, setState] = useState(defaultState());
+  const [view, setView] = useState("home"); // home | session | done
+  const [queue, setQueue] = useState([]);
+  const [qi, setQi] = useState(0);
+  const [sessionResults, setSessionResults] = useState([]);
+
+  useEffect(() => {
+    loadState().then((s) => {
+      setState(s);
+      setLoaded(true);
+    });
+  }, []);
+
+  // Persist whenever state changes (after initial load)
+  useEffect(() => {
+    if (loaded) saveState(state);
+  }, [state, loaded]);
+
+  // Combine built-in words with user's custom words
+  const allWords = useMemo(
+    () => [...WORDS, ...(state.customWords || [])],
+    [state.customWords]
+  );
+
+  const startSession = () => {
+    const cats = new Set(state.settings.cats);
+    const pool = allWords.filter((w) => cats.has(w.cat));
+    if (pool.length < 4) return;
+    const q = buildQueue(pool, state.progress);
+    setQueue(q);
+    setQi(0);
+    setSessionResults([]);
+    setView("session");
+  };
+
+  const startChallengeSession = () => {
+    const challenges = allWords.filter((w) => {
+      const p = state.progress[w.id];
+      return p && p.inChallenges;
+    });
+    if (challenges.length === 0) return;
+    // Shuffle and cap at SESSION_SIZE
+    const shuffled = [...challenges].sort(() => Math.random() - 0.5);
+    const q = shuffled.slice(0, SESSION_SIZE);
+    setQueue(q);
+    setQi(0);
+    setSessionResults([]);
+    setView("session");
+  };
+
+  const addCustomWord = (he, en, cat) => {
+    const heTrim = (he || "").trim();
+    const enTrim = (en || "").trim();
+    if (!heTrim || !enTrim || !cat) return;
+    setState((prev) => ({
+      ...prev,
+      customWords: [
+        ...(prev.customWords || []),
+        {
+          id: "cw_" + Math.random().toString(36).slice(2, 10),
+          he: heTrim,
+          en: enTrim,
+          cat,
+        },
+      ],
+    }));
+  };
+
+  const deleteCustomWord = (id) => {
+    setState((prev) => {
+      const newProgress = { ...prev.progress };
+      delete newProgress[id];
+      return {
+        ...prev,
+        progress: newProgress,
+        customWords: (prev.customWords || []).filter((w) => w.id !== id),
+      };
+    });
+  };
+
+  const recordAnswer = (word, correct) => {
+    setSessionResults((prev) => [...prev, { word, correct }]);
+    setState((prev) => {
+      const p = prev.progress[word.id] || {
+        seen: 0,
+        correct: 0,
+        streak: 0,
+        missStreak: 0,
+        inChallenges: false,
+      };
+      const nextWordStreak = correct ? (p.streak || 0) + 1 : 0;
+      const nextMissStreak = correct ? 0 : (p.missStreak || 0) + 1;
+      let nextInChallenges = p.inChallenges || false;
+      // Enter challenges on any wrong answer
+      if (!correct) nextInChallenges = true;
+      // Exit challenges when right 3 in a row while in challenges
+      if (nextInChallenges && nextWordStreak >= 3) nextInChallenges = false;
+
+      const newP = {
+        seen: p.seen + 1,
+        correct: p.correct + (correct ? 1 : 0),
+        streak: nextWordStreak,
+        missStreak: nextMissStreak,
+        inChallenges: nextInChallenges,
+        lastSeen: Date.now(),
+      };
+      const today = todayStr();
+      const isNewDay = prev.stats.lastDate !== today;
+      const dayGap =
+        prev.stats.lastDate &&
+        (new Date(today) - new Date(prev.stats.lastDate)) / 86400000;
+      let newDayStreak = prev.stats.streak;
+      if (isNewDay) {
+        newDayStreak = dayGap === 1 ? newDayStreak + 1 : 1;
+      }
+      return {
+        ...prev,
+        progress: { ...prev.progress, [word.id]: newP },
+        stats: {
+          ...prev.stats,
+          xp: prev.stats.xp + (correct ? 10 : 2),
+          streak: newDayStreak,
+          lastDate: today,
+        },
+      };
+    });
+  };
+
+  const nextCard = () => {
+    // If this was a TYPE-mode card that was answered wrong, requeue
+    // the same word a few cards ahead so the user practices it again
+    // until they get it right. We only requeue in type mode — flashcards
+    // are self-rated and the user has already chosen "Knew it" / "Didn't".
+    const lastResult = sessionResults[sessionResults.length - 1];
+    const justAnsweredWord = queue[qi];
+    const shouldRequeue =
+      state.settings.mode === "type" &&
+      lastResult &&
+      !lastResult.correct &&
+      justAnsweredWord;
+
+    if (shouldRequeue) {
+      // Insert the word back into the queue, ~3 positions ahead, so
+      // there's some other content between misses. If we're near the
+      // end of the queue, just append.
+      setQueue((prevQueue) => {
+        const insertAt = Math.min(qi + 4, prevQueue.length);
+        const newQueue = [...prevQueue];
+        newQueue.splice(insertAt, 0, justAnsweredWord);
+        return newQueue;
+      });
+      setQi(qi + 1);
+      return;
+    }
+
+    if (qi + 1 >= queue.length) {
+      setState((prev) => ({
+        ...prev,
+        stats: { ...prev.stats, sessionsDone: prev.stats.sessionsDone + 1 },
+      }));
+      setView("done");
+    } else {
+      setQi(qi + 1);
+    }
+  };
+
+  if (!loaded) return <LoadingView />;
+
+  return (
+    <div style={styles.appShell}>
+      <GlobalStyles />
+      <Header stats={state.stats} onHome={() => setView("home")} />
+      <main style={styles.main}>
+        {view === "home" && (
+          <HomeView
+            state={state}
+            setState={setState}
+            allWords={allWords}
+            onStart={startSession}
+            onStartChallenge={startChallengeSession}
+            onOpenWordBank={() => setView("wordbank")}
+          />
+        )}
+        {view === "wordbank" && (
+          <WordBankView
+            customWords={state.customWords || []}
+            onAdd={addCustomWord}
+            onDelete={deleteCustomWord}
+            onBack={() => setView("home")}
+          />
+        )}
+        {view === "session" && queue[qi] && (
+          <SessionView
+            key={queue[qi].id + qi}
+            word={queue[qi]}
+            progress={qi + 1}
+            total={queue.length}
+            mode={state.settings.mode}
+            onAnswer={recordAnswer}
+            onNext={nextCard}
+          />
+        )}
+        {view === "done" && (
+          <DoneView
+            results={sessionResults}
+            onHome={() => setView("home")}
+            onAgain={startSession}
+          />
+        )}
+      </main>
+      <footer style={styles.footer}>
+        עברית עסקית · Business Hebrew Practice
+      </footer>
+    </div>
+  );
+}
+
+// ============================================================
+// HEADER
+// ============================================================
+function Header({ stats, onHome }) {
+  return (
+    <header style={styles.header}>
+      <button onClick={onHome} style={styles.logoBtn}>
+        <span style={styles.logoMark}>ע</span>
+        <span style={styles.logoText}>Lexicon</span>
+      </button>
+      <div style={styles.statChips}>
+        <StatChip icon="◆" label="XP" value={stats.xp} />
+        <StatChip icon="✦" label="streak" value={stats.streak} />
+      </div>
+    </header>
+  );
+}
+
+function StatChip({ icon, label, value }) {
+  return (
+    <div style={styles.statChip}>
+      <span style={styles.statChipIcon}>{icon}</span>
+      <span style={styles.statChipValue}>{value}</span>
+      <span style={styles.statChipLabel}>{label}</span>
+    </div>
+  );
+}
+
+// ============================================================
+// HOME VIEW
+// ============================================================
+function HomeView({ state, setState, allWords, onStart, onStartChallenge, onOpenWordBank }) {
+  const toggleCat = (id) => {
+    setState((prev) => {
+      const cats = new Set(prev.settings.cats);
+      if (cats.has(id)) cats.delete(id);
+      else cats.add(id);
+      if (cats.size === 0) return prev;
+      return {
+        ...prev,
+        settings: { ...prev.settings, cats: Array.from(cats) },
+      };
+    });
+  };
+
+  const setMode = (mode) => {
+    setState((prev) => ({
+      ...prev,
+      settings: { ...prev.settings, mode },
+    }));
+  };
+
+  // Count words currently flagged as challenging
+  const challengeCount = useMemo(() => {
+    return allWords.filter((w) => {
+      const p = state.progress[w.id];
+      return p && p.inChallenges;
+    }).length;
+  }, [state.progress, allWords]);
+
+  // Compute mastery per category
+  const masteryByCat = useMemo(() => {
+    const result = {};
+    CATEGORIES.forEach((c) => {
+      const catWords = allWords.filter((w) => w.cat === c.id);
+      const mastered = catWords.filter((w) => {
+        const p = state.progress[w.id];
+        return p && p.streak >= 3;
+      }).length;
+      result[c.id] = { mastered, total: catWords.length };
+    });
+    return result;
+  }, [state.progress, allWords]);
+
+  const selectedCats = new Set(state.settings.cats);
+  const poolSize = allWords.filter((w) => selectedCats.has(w.cat)).length;
+
+  return (
+    <div style={styles.homeWrap}>
+      <div style={styles.heroCard}>
+        <div style={styles.heroEyebrow}>Session No. {state.stats.sessionsDone + 1}</div>
+        <h1 style={styles.heroTitle}>
+          <span style={styles.heroHebrew} dir="rtl">תרגול יומי</span>
+          <span style={styles.heroDivider}>·</span>
+          <span style={styles.heroEnglish}>Daily Drill</span>
+        </h1>
+        <p style={styles.heroSub}>
+          Ten words, thirty seconds each. Professional vocabulary for the
+          Tel Aviv boardroom.
+        </p>
+      </div>
+
+      {challengeCount > 0 && (
+        <button onClick={onStartChallenge} style={styles.challengeCard}>
+          <div style={styles.challengeLeftCol}>
+            <div style={styles.challengeEyebrow}>
+              <span dir="rtl">מילים מאתגרות</span>
+              <span style={styles.challengeDot}>·</span>
+              <span>Challenges</span>
+            </div>
+            <div style={styles.challengeTitle}>
+              {challengeCount} {challengeCount === 1 ? "word" : "words"} to drill
+            </div>
+            <div style={styles.challengeDesc}>
+              Words you missed. Get each right three times in a row to clear it.
+            </div>
+          </div>
+          <div style={styles.challengeArrow}>→</div>
+        </button>
+      )}
+
+      <section style={styles.section}>
+        <h2 style={styles.sectionLabel}>Domain</h2>
+        <div style={styles.catGrid}>
+          {CATEGORIES.map((c) => {
+            const active = selectedCats.has(c.id);
+            const m = masteryByCat[c.id];
+            const pct = (m.mastered / m.total) * 100;
+            return (
+              <button
+                key={c.id}
+                onClick={() => toggleCat(c.id)}
+                style={{
+                  ...styles.catCard,
+                  ...(active ? styles.catCardActive : {}),
+                }}
+              >
+                <div style={styles.catCardTop}>
+                  <span style={styles.catLabel}>{c.label}</span>
+                  <span style={styles.catHe} dir="rtl">{c.he}</span>
+                </div>
+                <div style={styles.catMeter}>
+                  <div
+                    style={{
+                      ...styles.catMeterFill,
+                      width: `${pct}%`,
+                      background: active ? "var(--ink)" : "var(--muted)",
+                    }}
+                  />
+                </div>
+                <div style={styles.catMeta}>
+                  {m.mastered} / {m.total} mastered
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      <section style={styles.section}>
+        <h2 style={styles.sectionLabel}>Mode</h2>
+        <div style={styles.modeRow}>
+          <ModeOption
+            id="type"
+            title="Type"
+            desc="Write in Hebrew from English prompt"
+            active={state.settings.mode === "type"}
+            onClick={() => setMode("type")}
+          />
+          <ModeOption
+            id="flashcard"
+            title="Flashcards"
+            desc="Tap to flip, rate yourself"
+            active={state.settings.mode === "flashcard"}
+            onClick={() => setMode("flashcard")}
+          />
+        </div>
+      </section>
+
+      <button
+        onClick={onStart}
+        disabled={poolSize < 4}
+        style={{
+          ...styles.startBtn,
+          ...(poolSize < 4 ? styles.startBtnDisabled : {}),
+        }}
+      >
+        <span>Start session</span>
+        <span style={styles.startBtnArrow}>→</span>
+      </button>
+
+      <button onClick={onOpenWordBank} style={styles.wordBankLink}>
+        <span>Word bank</span>
+        <span style={styles.wordBankLinkMeta}>
+          {(state.customWords || []).length > 0
+            ? `${(state.customWords || []).length} custom · add or remove`
+            : "Add your own words"}
+        </span>
+        <span style={styles.wordBankLinkArrow}>→</span>
+      </button>
+    </div>
+  );
+}
+
+function ModeOption({ title, desc, active, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        ...styles.modeCard,
+        ...(active ? styles.modeCardActive : {}),
+      }}
+    >
+      <div style={styles.modeCardDot}>
+        {active && <div style={styles.modeCardDotInner} />}
+      </div>
+      <div>
+        <div style={styles.modeCardTitle}>{title}</div>
+        <div style={styles.modeCardDesc}>{desc}</div>
+      </div>
+    </button>
+  );
+}
+
+// ============================================================
+// WORD BANK VIEW — add / view / remove custom words
+// ============================================================
+function WordBankView({ customWords, onAdd, onDelete, onBack }) {
+  const [enInput, setEnInput] = useState("");
+  const [heInput, setHeInput] = useState("");
+  const [catInput, setCatInput] = useState(CATEGORIES[0].id);
+  const enRef = useRef(null);
+
+  const canAdd = enInput.trim() && heInput.trim() && catInput;
+
+  const handleAdd = () => {
+    if (!canAdd) return;
+    onAdd(heInput, enInput, catInput);
+    setEnInput("");
+    setHeInput("");
+    // keep catInput the same — user may be adding several to same category
+    enRef.current?.focus();
+  };
+
+  // Group custom words by category for display
+  const grouped = useMemo(() => {
+    const result = {};
+    CATEGORIES.forEach((c) => (result[c.id] = []));
+    customWords.forEach((w) => {
+      if (!result[w.cat]) result[w.cat] = [];
+      result[w.cat].push(w);
+    });
+    return result;
+  }, [customWords]);
+
+  const categoryLabel = (catId) => {
+    const c = CATEGORIES.find((c) => c.id === catId);
+    return c ? c.label : catId;
+  };
+
+  return (
+    <div style={styles.wbWrap}>
+      <button onClick={onBack} style={styles.wbBack}>
+        ← Home
+      </button>
+
+      <div style={styles.wbHero}>
+        <div style={styles.wbEyebrow}>Word bank</div>
+        <h1 style={styles.wbTitle}>
+          <span style={styles.wbTitleHebrew} dir="rtl">
+            מילון אישי
+          </span>
+          <span style={styles.wbTitleDivider}>·</span>
+          <span style={styles.wbTitleEnglish}>Your own words</span>
+        </h1>
+        <p style={styles.wbSub}>
+          Add terms you hit in interviews, news, or at work. They'll show up in
+          sessions and Challenges alongside the built-in words.
+        </p>
+      </div>
+
+      <section style={styles.wbSection}>
+        <h2 style={styles.sectionLabel}>Add a word</h2>
+        <div style={styles.wbForm}>
+          <div style={styles.wbField}>
+            <label style={styles.wbLabel}>English</label>
+            <input
+              ref={enRef}
+              type="text"
+              value={enInput}
+              onChange={(e) => setEnInput(e.target.value)}
+              placeholder="e.g. leveraged buyout"
+              style={styles.wbInput}
+              autoComplete="off"
+            />
+          </div>
+          <div style={styles.wbField}>
+            <label style={styles.wbLabel}>Hebrew</label>
+            <input
+              type="text"
+              dir="rtl"
+              lang="he"
+              value={heInput}
+              onChange={(e) => setHeInput(e.target.value)}
+              placeholder="…לדוגמה"
+              style={{ ...styles.wbInput, ...styles.wbInputHe }}
+              autoComplete="off"
+            />
+          </div>
+          <div style={styles.wbField}>
+            <label style={styles.wbLabel}>Category</label>
+            <div style={styles.wbCatRow}>
+              {CATEGORIES.map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => setCatInput(c.id)}
+                  style={{
+                    ...styles.wbCatPill,
+                    ...(catInput === c.id ? styles.wbCatPillActive : {}),
+                  }}
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <button
+            onClick={handleAdd}
+            disabled={!canAdd}
+            style={{
+              ...styles.wbAddBtn,
+              ...(!canAdd ? styles.wbAddBtnDisabled : {}),
+            }}
+          >
+            Add word →
+          </button>
+        </div>
+      </section>
+
+      <section style={styles.wbSection}>
+        <h2 style={styles.sectionLabel}>
+          Your words ({customWords.length})
+        </h2>
+        {customWords.length === 0 ? (
+          <div style={styles.wbEmpty}>
+            No custom words yet. Add your first one above.
+          </div>
+        ) : (
+          <div style={styles.wbGroupList}>
+            {CATEGORIES.map((c) => {
+              const words = grouped[c.id] || [];
+              if (words.length === 0) return null;
+              return (
+                <div key={c.id} style={styles.wbGroup}>
+                  <div style={styles.wbGroupLabel}>{c.label}</div>
+                  <div style={styles.wbList}>
+                    {words.map((w) => (
+                      <div key={w.id} style={styles.wbRow}>
+                        <span style={styles.wbRowHe} dir="rtl">
+                          {w.he}
+                        </span>
+                        <span style={styles.wbRowEn}>{w.en}</span>
+                        <button
+                          onClick={() => onDelete(w.id)}
+                          style={styles.wbDeleteBtn}
+                          aria-label={`Delete ${w.en}`}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}
+
+// ============================================================
+// SESSION VIEW
+// ============================================================
+function SessionView({ word, progress, total, mode, onAnswer, onNext }) {
+  return (
+    <div style={styles.sessionWrap}>
+      <div style={styles.progressRow}>
+        <div style={styles.progressTrack}>
+          <div
+            style={{
+              ...styles.progressFill,
+              width: `${(progress / total) * 100}%`,
+            }}
+          />
+        </div>
+        <div style={styles.progressText}>
+          {progress} / {total}
+        </div>
+      </div>
+
+      {mode === "flashcard" ? (
+        <FlashcardCard
+          word={word}
+          revealed={false}
+          onReveal={() => {}}
+          onRate={(correct) => {
+            onAnswer(word, correct);
+            onNext();
+          }}
+        />
+      ) : (
+        <TypeCard word={word} onAnswer={onAnswer} onNext={onNext} />
+      )}
+    </div>
+  );
+}
+
+// Wrapped flashcard to manage its own reveal state
+function FlashcardCard({ word, onRate }) {
+  const [revealed, setRevealed] = useState(false);
+  return (
+    <>
+      <div
+        onClick={!revealed ? () => setRevealed(true) : undefined}
+        style={{
+          ...styles.flashcard,
+          cursor: revealed ? "default" : "pointer",
+        }}
+      >
+        <div style={styles.flashcardInner}>
+          <div style={styles.flashcardHebrew} dir="rtl">
+            {word.he}
+          </div>
+          {revealed && (
+            <>
+              <div style={styles.flashcardDivider} />
+              <div style={styles.flashcardEn}>{word.en}</div>
+            </>
+          )}
+          {!revealed && <div style={styles.tapHint}>tap to reveal</div>}
+        </div>
+      </div>
+      {revealed && (
+        <div style={styles.rateRow}>
+          <button
+            onClick={() => onRate(false)}
+            style={{ ...styles.rateBtn, ...styles.rateBtnHard }}
+          >
+            Didn't know
+          </button>
+          <button
+            onClick={() => onRate(true)}
+            style={{ ...styles.rateBtn, ...styles.rateBtnEasy }}
+          >
+            Knew it
+          </button>
+        </div>
+      )}
+    </>
+  );
+}
+
+// ============================================================
+// TYPE CARD — English prompt, type Hebrew answer
+// ============================================================
+// Strips Hebrew diacritics (nikud) and normalizes whitespace so
+// comparison works regardless of vowel points or extra spaces.
+function normalizeHebrew(s) {
+  return s
+    .replace(/[\u0591-\u05C7]/g, "") // strip nikud / cantillation
+    .replace(/[\u05F3\u05F4]/g, "") // strip geresh, gershayim
+    .replace(/["'׳״]/g, "") // strip common quote-like marks
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function TypeCard({ word, onAnswer, onNext }) {
+  const [input, setInput] = useState("");
+  const [submitted, setSubmitted] = useState(null);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  const handleSubmit = () => {
+    if (submitted) return;
+    if (!input.trim()) return;
+    const correct = normalizeHebrew(input) === normalizeHebrew(word.he);
+    setSubmitted({ correct });
+    onAnswer(word, correct);
+  };
+
+  const handleShowAnswer = () => {
+    if (submitted) return;
+    setSubmitted({ correct: false, revealed: true });
+    onAnswer(word, false);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    if (submitted) {
+      onNext();
+    } else if (input.trim()) {
+      handleSubmit();
+    }
+  };
+
+  return (
+    <>
+      <div style={styles.quizPrompt}>
+        <div style={styles.quizPromptLabel}>Write in Hebrew</div>
+        <div style={styles.quizPromptWord}>
+          <span style={styles.quizEnglish}>{word.en}</span>
+        </div>
+      </div>
+
+      <div style={styles.typeWrap}>
+        <input
+          ref={inputRef}
+          type="text"
+          dir="rtl"
+          lang="he"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          readOnly={!!submitted}
+          placeholder="…הקלד כאן"
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          style={{
+            ...styles.typeInput,
+            ...(submitted
+              ? submitted.correct
+                ? styles.typeInputCorrect
+                : styles.typeInputWrong
+              : {}),
+          }}
+        />
+        {!submitted && (
+          <div style={styles.typeBtnRow}>
+            <button onClick={handleShowAnswer} style={styles.typeSkipBtn}>
+              Show answer
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={!input.trim()}
+              style={{
+                ...styles.typeSubmitBtn,
+                ...(!input.trim() ? styles.typeSubmitBtnDisabled : {}),
+              }}
+            >
+              Check →
+            </button>
+          </div>
+        )}
+      </div>
+
+      {submitted && (
+        <div style={styles.revealPanel}>
+          <div
+            style={{
+              ...styles.revealStatus,
+              color: submitted.correct ? "var(--success)" : "var(--error)",
+            }}
+          >
+            {submitted.correct ? "נכון" : "Not quite"}
+          </div>
+          <div style={styles.revealHebrew} dir="rtl">
+            {word.heN || word.he}
+          </div>
+          {word.tr && (
+            <div style={styles.revealTr}>{word.tr}</div>
+          )}
+          <div style={styles.revealEn}>{word.en}</div>
+          <button onClick={onNext} style={styles.revealNextBtn}>
+            Continue →
+          </button>
+        </div>
+      )}
+    </>
+  );
+}
+
+// ============================================================
+// DONE VIEW
+// ============================================================
+function DoneView({ results, onHome, onAgain }) {
+  const correct = results.filter((r) => r.correct).length;
+  const total = results.length;
+  const pct = Math.round((correct / total) * 100);
+
+  return (
+    <div style={styles.doneWrap}>
+      <div style={styles.doneEyebrow}>Session complete</div>
+      <div style={styles.doneScore}>{pct}%</div>
+      <div style={styles.doneDetail}>
+        {correct} of {total} correct · +{correct * 10 + (total - correct) * 2} XP
+      </div>
+
+      <div style={styles.doneList}>
+        {results.map((r, i) => (
+          <div key={i} style={styles.doneRow}>
+            <span
+              style={{
+                ...styles.doneDot,
+                background: r.correct ? "var(--success)" : "var(--error)",
+              }}
+            />
+            <span style={styles.doneHe} dir="rtl">
+              {r.word.he}
+            </span>
+            <span style={styles.doneEn}>{r.word.en}</span>
+          </div>
+        ))}
+      </div>
+
+      <div style={styles.doneBtns}>
+        <button onClick={onHome} style={styles.doneBtnSecondary}>
+          Back
+        </button>
+        <button onClick={onAgain} style={styles.doneBtnPrimary}>
+          Another round →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// MISC
+// ============================================================
+function LoadingView() {
+  return (
+    <div style={styles.loadingWrap}>
+      <GlobalStyles />
+      <div style={styles.loadingText}>טוען…</div>
+    </div>
+  );
+}
+
+function GlobalStyles() {
+  return (
+    <style>{`
+      @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Work+Sans:wght@400;500;600&display=swap');
+
+      :root {
+        --paper: #F7F1E5;
+        --paper-deep: #EFE6D2;
+        --ink: #1F1A14;
+        --ink-soft: #4A3F30;
+        --muted: #A89A7E;
+        --line: #D9CDB3;
+        --accent: #B8803A;
+        --accent-deep: #8C5F28;
+        --success: #5C7A3E;
+        --error: #A8442E;
+      }
+
+      * { box-sizing: border-box; }
+      body { margin: 0; }
+
+      button { font-family: inherit; }
+      button:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+
+      @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes pulseIn {
+        0% { transform: scale(0.96); opacity: 0; }
+        100% { transform: scale(1); opacity: 1; }
+      }
+    `}</style>
+  );
+}
+
+// ============================================================
+// STYLES
+// ============================================================
+const FONT_DISPLAY = "'Fraunces', Georgia, serif";
+const FONT_BODY = "'Work Sans', -apple-system, sans-serif";
+const FONT_HEBREW = "'Frank Ruhl Libre', 'David', serif";
+
+const styles = {
+  appShell: {
+    minHeight: "100vh",
+    background: "var(--paper)",
+    color: "var(--ink)",
+    fontFamily: FONT_BODY,
+    backgroundImage:
+      "radial-gradient(circle at 20% 10%, rgba(184,128,58,0.06) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(31,26,20,0.04) 0%, transparent 50%)",
+    display: "flex",
+    flexDirection: "column",
+  },
+  main: {
+    flex: 1,
+    maxWidth: 720,
+    width: "100%",
+    margin: "0 auto",
+    padding: "24px 20px 48px",
+  },
+  header: {
+    padding: "20px 24px",
+    borderBottom: "1px solid var(--line)",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    maxWidth: 720,
+    width: "100%",
+    margin: "0 auto",
+  },
+  logoBtn: {
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    background: "none",
+    border: "none",
+    padding: 0,
+    cursor: "pointer",
+  },
+  logoMark: {
+    fontFamily: FONT_HEBREW,
+    fontSize: 32,
+    fontWeight: 700,
+    color: "var(--accent-deep)",
+    lineHeight: 1,
+  },
+  logoText: {
+    fontFamily: FONT_DISPLAY,
+    fontSize: 20,
+    fontWeight: 500,
+    fontStyle: "italic",
+    letterSpacing: "-0.02em",
+  },
+  statChips: {
+    display: "flex",
+    gap: 8,
+  },
+  statChip: {
+    display: "flex",
+    alignItems: "baseline",
+    gap: 6,
+    padding: "6px 12px",
+    background: "var(--paper-deep)",
+    border: "1px solid var(--line)",
+    borderRadius: 999,
+    fontSize: 13,
+  },
+  statChipIcon: {
+    color: "var(--accent)",
+    fontSize: 11,
+  },
+  statChipValue: {
+    fontWeight: 600,
+    fontVariantNumeric: "tabular-nums",
+  },
+  statChipLabel: {
+    color: "var(--muted)",
+    fontSize: 11,
+    textTransform: "uppercase",
+    letterSpacing: "0.05em",
+  },
+  footer: {
+    padding: "24px",
+    textAlign: "center",
+    fontSize: 12,
+    color: "var(--muted)",
+    fontFamily: FONT_HEBREW,
+    letterSpacing: "0.02em",
+  },
+  homeWrap: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 32,
+    animation: "fadeInUp 0.5s ease",
+  },
+  heroCard: {
+    padding: "32px 0 8px",
+    borderBottom: "1px solid var(--line)",
+  },
+  heroEyebrow: {
+    fontSize: 11,
+    color: "var(--muted)",
+    textTransform: "uppercase",
+    letterSpacing: "0.12em",
+    marginBottom: 16,
+    fontWeight: 500,
+  },
+  heroTitle: {
+    fontFamily: FONT_DISPLAY,
+    fontSize: "clamp(32px, 6vw, 48px)",
+    fontWeight: 400,
+    lineHeight: 1.05,
+    letterSpacing: "-0.02em",
+    margin: 0,
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "baseline",
+    gap: 12,
+  },
+  heroHebrew: {
+    fontFamily: FONT_HEBREW,
+    fontWeight: 500,
+  },
+  heroDivider: {
+    color: "var(--accent)",
+    fontWeight: 400,
+  },
+  heroEnglish: {
+    fontStyle: "italic",
+    color: "var(--ink-soft)",
+  },
+  heroSub: {
+    marginTop: 16,
+    fontSize: 15,
+    color: "var(--ink-soft)",
+    lineHeight: 1.5,
+    maxWidth: 480,
+  },
+  challengeCard: {
+    padding: "18px 22px",
+    background: "var(--accent)",
+    color: "var(--paper)",
+    border: "none",
+    borderRadius: 10,
+    cursor: "pointer",
+    textAlign: "left",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 12,
+    fontFamily: FONT_BODY,
+    transition: "all 0.15s ease",
+    boxShadow: "0 2px 0 var(--accent-deep)",
+    width: "100%",
+    animation: "fadeInUp 0.4s ease",
+  },
+  challengeLeftCol: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 0,
+    flex: 1,
+    minWidth: 0,
+  },
+  challengeEyebrow: {
+    fontSize: 11,
+    textTransform: "uppercase",
+    letterSpacing: "0.1em",
+    fontWeight: 600,
+    opacity: 0.9,
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+  },
+  challengeDot: {
+    opacity: 0.6,
+  },
+  challengeTitle: {
+    fontFamily: FONT_DISPLAY,
+    fontSize: 20,
+    fontWeight: 500,
+    letterSpacing: "-0.01em",
+    marginTop: 6,
+    fontVariantNumeric: "tabular-nums",
+  },
+  challengeDesc: {
+    fontSize: 13,
+    opacity: 0.85,
+    marginTop: 4,
+    lineHeight: 1.4,
+  },
+  challengeArrow: {
+    fontSize: 24,
+    fontFamily: FONT_BODY,
+    fontWeight: 300,
+    flexShrink: 0,
+  },
+  section: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 12,
+  },
+  sectionLabel: {
+    fontSize: 11,
+    color: "var(--muted)",
+    textTransform: "uppercase",
+    letterSpacing: "0.12em",
+    fontWeight: 600,
+    margin: 0,
+  },
+  catGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
+    gap: 10,
+  },
+  catCard: {
+    padding: "14px 14px 12px",
+    background: "var(--paper-deep)",
+    border: "1px solid var(--line)",
+    borderRadius: 8,
+    cursor: "pointer",
+    textAlign: "left",
+    transition: "all 0.15s ease",
+    display: "flex",
+    flexDirection: "column",
+    gap: 8,
+  },
+  catCardActive: {
+    background: "var(--ink)",
+    borderColor: "var(--ink)",
+    color: "var(--paper)",
+  },
+  catCardTop: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "baseline",
+  },
+  catLabel: {
+    fontSize: 14,
+    fontWeight: 600,
+    letterSpacing: "-0.01em",
+  },
+  catHe: {
+    fontFamily: FONT_HEBREW,
+    fontSize: 13,
+    opacity: 0.7,
+  },
+  catMeter: {
+    height: 2,
+    background: "rgba(217,205,179,0.4)",
+    borderRadius: 2,
+    overflow: "hidden",
+  },
+  catMeterFill: {
+    height: "100%",
+    transition: "width 0.3s ease",
+  },
+  catMeta: {
+    fontSize: 11,
+    opacity: 0.6,
+    fontVariantNumeric: "tabular-nums",
+  },
+  modeRow: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: 10,
+  },
+  modeCard: {
+    padding: "14px 16px",
+    background: "var(--paper-deep)",
+    border: "1px solid var(--line)",
+    borderRadius: 8,
+    cursor: "pointer",
+    textAlign: "left",
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    transition: "all 0.15s ease",
+  },
+  modeCardActive: {
+    borderColor: "var(--ink)",
+    background: "var(--paper)",
+  },
+  modeCardDot: {
+    width: 16,
+    height: 16,
+    borderRadius: "50%",
+    border: "1.5px solid var(--ink)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  modeCardDotInner: {
+    width: 8,
+    height: 8,
+    borderRadius: "50%",
+    background: "var(--ink)",
+  },
+  modeCardTitle: {
+    fontSize: 14,
+    fontWeight: 600,
+  },
+  modeCardDesc: {
+    fontSize: 12,
+    color: "var(--ink-soft)",
+    marginTop: 2,
+  },
+  startBtn: {
+    marginTop: 8,
+    padding: "18px 24px",
+    background: "var(--ink)",
+    color: "var(--paper)",
+    border: "none",
+    borderRadius: 8,
+    fontSize: 16,
+    fontWeight: 500,
+    cursor: "pointer",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    fontFamily: FONT_DISPLAY,
+    letterSpacing: "-0.01em",
+    transition: "all 0.15s ease",
+  },
+  startBtnDisabled: {
+    opacity: 0.4,
+    cursor: "not-allowed",
+  },
+  startBtnArrow: {
+    fontFamily: FONT_BODY,
+    fontSize: 20,
+  },
+  sessionWrap: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 24,
+    animation: "fadeInUp 0.3s ease",
+  },
+  progressRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: 16,
+  },
+  progressTrack: {
+    flex: 1,
+    height: 3,
+    background: "var(--line)",
+    borderRadius: 3,
+    overflow: "hidden",
+  },
+  progressFill: {
+    height: "100%",
+    background: "var(--ink)",
+    transition: "width 0.4s ease",
+  },
+  progressText: {
+    fontSize: 12,
+    color: "var(--muted)",
+    fontVariantNumeric: "tabular-nums",
+    fontWeight: 500,
+  },
+  flashcard: {
+    padding: "48px 32px",
+    background: "var(--paper-deep)",
+    border: "1px solid var(--line)",
+    borderRadius: 12,
+    minHeight: 280,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+    animation: "pulseIn 0.3s ease",
+  },
+  flashcardInner: {
+    textAlign: "center",
+    width: "100%",
+  },
+  flashcardHebrew: {
+    fontFamily: FONT_HEBREW,
+    fontSize: "clamp(40px, 8vw, 64px)",
+    fontWeight: 500,
+    lineHeight: 1.2,
+  },
+  flashcardDivider: {
+    width: 32,
+    height: 1,
+    background: "var(--accent)",
+    margin: "24px auto",
+  },
+  flashcardEn: {
+    fontFamily: FONT_DISPLAY,
+    fontSize: 22,
+    fontStyle: "italic",
+    color: "var(--ink-soft)",
+  },
+  tapHint: {
+    position: "absolute",
+    bottom: 16,
+    left: 0,
+    right: 0,
+    textAlign: "center",
+    fontSize: 11,
+    color: "var(--muted)",
+    textTransform: "uppercase",
+    letterSpacing: "0.15em",
+  },
+  rateRow: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: 10,
+  },
+  rateBtn: {
+    padding: "16px",
+    borderRadius: 8,
+    border: "1px solid var(--line)",
+    fontSize: 14,
+    fontWeight: 500,
+    cursor: "pointer",
+    transition: "all 0.15s ease",
+    fontFamily: FONT_BODY,
+  },
+  rateBtnHard: {
+    background: "var(--paper-deep)",
+    color: "var(--error)",
+    borderColor: "var(--error)",
+  },
+  rateBtnEasy: {
+    background: "var(--ink)",
+    color: "var(--paper)",
+    borderColor: "var(--ink)",
+  },
+  quizPrompt: {
+    padding: "32px 24px",
+    background: "var(--paper-deep)",
+    border: "1px solid var(--line)",
+    borderRadius: 12,
+    textAlign: "center",
+    animation: "pulseIn 0.3s ease",
+  },
+  quizPromptLabel: {
+    fontSize: 11,
+    color: "var(--muted)",
+    textTransform: "uppercase",
+    letterSpacing: "0.12em",
+    marginBottom: 16,
+    fontWeight: 600,
+  },
+  quizPromptWord: {
+    minHeight: 80,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  quizHebrew: {
+    fontFamily: FONT_HEBREW,
+    fontSize: "clamp(36px, 7vw, 56px)",
+    fontWeight: 500,
+    lineHeight: 1.2,
+  },
+  quizEnglish: {
+    fontFamily: FONT_DISPLAY,
+    fontSize: "clamp(28px, 5vw, 42px)",
+    fontStyle: "italic",
+    fontWeight: 400,
+    letterSpacing: "-0.02em",
+  },
+  optionsGrid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: 10,
+  },
+  optionBtn: {
+    padding: "18px 16px",
+    background: "var(--paper-deep)",
+    border: "1px solid var(--line)",
+    borderRadius: 8,
+    fontSize: 15,
+    cursor: "pointer",
+    transition: "all 0.15s ease",
+    minHeight: 60,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    textAlign: "center",
+    fontFamily: FONT_BODY,
+    color: "var(--ink)",
+  },
+  optionCorrect: {
+    background: "var(--success)",
+    color: "var(--paper)",
+    borderColor: "var(--success)",
+  },
+  optionWrong: {
+    background: "var(--error)",
+    color: "var(--paper)",
+    borderColor: "var(--error)",
+  },
+  optionDim: {
+    opacity: 0.4,
+  },
+  optionHe: {
+    fontFamily: FONT_HEBREW,
+    fontSize: 22,
+    fontWeight: 500,
+  },
+  optionEn: {
+    fontSize: 15,
+    fontWeight: 500,
+  },
+  typeWrap: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 12,
+  },
+  typeInput: {
+    width: "100%",
+    padding: "20px 22px",
+    background: "var(--paper-deep)",
+    border: "1.5px solid var(--line)",
+    borderRadius: 10,
+    fontSize: 28,
+    fontFamily: FONT_HEBREW,
+    fontWeight: 500,
+    color: "var(--ink)",
+    outline: "none",
+    transition: "all 0.15s ease",
+    textAlign: "right",
+    direction: "rtl",
+  },
+  typeInputCorrect: {
+    borderColor: "var(--success)",
+    background: "rgba(92,122,62,0.08)",
+  },
+  typeInputWrong: {
+    borderColor: "var(--error)",
+    background: "rgba(168,68,46,0.08)",
+  },
+  typeBtnRow: {
+    display: "grid",
+    gridTemplateColumns: "1fr 2fr",
+    gap: 10,
+  },
+  typeSkipBtn: {
+    padding: "14px 16px",
+    background: "var(--paper-deep)",
+    border: "1px solid var(--line)",
+    borderRadius: 8,
+    fontSize: 13,
+    fontWeight: 500,
+    color: "var(--ink-soft)",
+    cursor: "pointer",
+    fontFamily: FONT_BODY,
+    transition: "all 0.15s ease",
+  },
+  typeSubmitBtn: {
+    padding: "14px 20px",
+    background: "var(--ink)",
+    color: "var(--paper)",
+    border: "none",
+    borderRadius: 8,
+    fontSize: 14,
+    fontWeight: 500,
+    cursor: "pointer",
+    fontFamily: FONT_DISPLAY,
+    letterSpacing: "-0.01em",
+    transition: "all 0.15s ease",
+  },
+  typeSubmitBtnDisabled: {
+    opacity: 0.4,
+    cursor: "not-allowed",
+  },
+  feedbackBar: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "16px 0",
+    borderTop: "1px solid var(--line)",
+    animation: "fadeInUp 0.3s ease",
+    flexWrap: "wrap",
+    gap: 12,
+  },
+  feedbackText: {
+    fontFamily: FONT_DISPLAY,
+    fontSize: 17,
+    fontStyle: "italic",
+    fontWeight: 500,
+  },
+  feedbackAnswer: {
+    fontFamily: FONT_HEBREW,
+    fontStyle: "normal",
+    color: "var(--ink)",
+    fontSize: 18,
+  },
+  nextBtn: {
+    padding: "10px 20px",
+    background: "var(--ink)",
+    color: "var(--paper)",
+    border: "none",
+    borderRadius: 6,
+    fontSize: 14,
+    fontWeight: 500,
+    cursor: "pointer",
+  },
+  // --- Type mode reveal panel (shown after submit) ---
+  revealPanel: {
+    padding: "24px 24px 20px",
+    background: "var(--paper-deep)",
+    border: "1px solid var(--line)",
+    borderRadius: 12,
+    textAlign: "center",
+    animation: "pulseIn 0.3s ease",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 8,
+  },
+  revealStatus: {
+    fontFamily: FONT_HEBREW,
+    fontSize: 18,
+    fontWeight: 600,
+    letterSpacing: "0.02em",
+    marginBottom: 4,
+  },
+  revealHebrew: {
+    fontFamily: FONT_HEBREW,
+    fontSize: "clamp(32px, 6vw, 44px)",
+    fontWeight: 500,
+    lineHeight: 1.3,
+    color: "var(--ink)",
+  },
+  revealTr: {
+    fontFamily: FONT_DISPLAY,
+    fontStyle: "italic",
+    fontSize: 18,
+    color: "var(--accent-deep)",
+    letterSpacing: "0.01em",
+    marginTop: -2,
+  },
+  revealEn: {
+    fontFamily: FONT_BODY,
+    fontSize: 14,
+    color: "var(--ink-soft)",
+    textTransform: "uppercase",
+    letterSpacing: "0.1em",
+    fontWeight: 500,
+    marginTop: 4,
+  },
+  revealNextBtn: {
+    marginTop: 16,
+    padding: "12px 28px",
+    background: "var(--ink)",
+    color: "var(--paper)",
+    border: "none",
+    borderRadius: 6,
+    fontSize: 14,
+    fontWeight: 500,
+    cursor: "pointer",
+    fontFamily: FONT_DISPLAY,
+    letterSpacing: "-0.01em",
+  },
+  doneWrap: {
+    textAlign: "center",
+    padding: "24px 0",
+    animation: "fadeInUp 0.4s ease",
+  },
+  doneEyebrow: {
+    fontSize: 11,
+    color: "var(--muted)",
+    textTransform: "uppercase",
+    letterSpacing: "0.12em",
+    fontWeight: 600,
+    marginBottom: 16,
+  },
+  doneScore: {
+    fontFamily: FONT_DISPLAY,
+    fontSize: 96,
+    fontWeight: 400,
+    lineHeight: 1,
+    letterSpacing: "-0.04em",
+    color: "var(--accent-deep)",
+  },
+  doneDetail: {
+    fontSize: 14,
+    color: "var(--ink-soft)",
+    marginTop: 8,
+    marginBottom: 32,
+  },
+  doneList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 0,
+    textAlign: "left",
+    border: "1px solid var(--line)",
+    borderRadius: 8,
+    overflow: "hidden",
+    marginBottom: 24,
+  },
+  doneRow: {
+    display: "grid",
+    gridTemplateColumns: "12px 1fr 1fr",
+    alignItems: "center",
+    gap: 16,
+    padding: "12px 16px",
+    borderBottom: "1px solid var(--line)",
+  },
+  doneDot: {
+    width: 8,
+    height: 8,
+    borderRadius: "50%",
+  },
+  doneHe: {
+    fontFamily: FONT_HEBREW,
+    fontSize: 18,
+    fontWeight: 500,
+    textAlign: "right",
+  },
+  doneEn: {
+    fontSize: 14,
+    color: "var(--ink-soft)",
+    fontStyle: "italic",
+    fontFamily: FONT_DISPLAY,
+  },
+  doneBtns: {
+    display: "grid",
+    gridTemplateColumns: "1fr 2fr",
+    gap: 10,
+  },
+  doneBtnSecondary: {
+    padding: "14px 20px",
+    background: "var(--paper-deep)",
+    border: "1px solid var(--line)",
+    borderRadius: 8,
+    fontSize: 14,
+    fontWeight: 500,
+    cursor: "pointer",
+  },
+  doneBtnPrimary: {
+    padding: "14px 20px",
+    background: "var(--ink)",
+    color: "var(--paper)",
+    border: "none",
+    borderRadius: 8,
+    fontSize: 14,
+    fontWeight: 500,
+    cursor: "pointer",
+    fontFamily: FONT_DISPLAY,
+    letterSpacing: "-0.01em",
+  },
+  loadingWrap: {
+    minHeight: "100vh",
+    background: "var(--paper)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  loadingText: {
+    fontFamily: FONT_HEBREW,
+    fontSize: 24,
+    color: "var(--muted)",
+  },
+  // --- Word bank link on home screen ---
+  wordBankLink: {
+    marginTop: 8,
+    padding: "14px 16px",
+    background: "transparent",
+    border: "1px dashed var(--line)",
+    borderRadius: 8,
+    cursor: "pointer",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 12,
+    color: "var(--ink-soft)",
+    fontFamily: FONT_BODY,
+    fontSize: 13,
+    transition: "all 0.15s ease",
+  },
+  wordBankLinkMeta: {
+    flex: 1,
+    textAlign: "center",
+    color: "var(--muted)",
+    fontSize: 12,
+  },
+  wordBankLinkArrow: {
+    fontSize: 16,
+  },
+  // --- Word bank view ---
+  wbWrap: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 32,
+    animation: "fadeInUp 0.4s ease",
+  },
+  wbBack: {
+    alignSelf: "flex-start",
+    background: "none",
+    border: "none",
+    padding: "6px 0",
+    fontSize: 13,
+    color: "var(--ink-soft)",
+    cursor: "pointer",
+    fontFamily: FONT_BODY,
+    fontWeight: 500,
+  },
+  wbHero: {
+    paddingBottom: 8,
+    borderBottom: "1px solid var(--line)",
+  },
+  wbEyebrow: {
+    fontSize: 11,
+    color: "var(--muted)",
+    textTransform: "uppercase",
+    letterSpacing: "0.12em",
+    marginBottom: 12,
+    fontWeight: 500,
+  },
+  wbTitle: {
+    fontFamily: FONT_DISPLAY,
+    fontSize: "clamp(28px, 5vw, 40px)",
+    fontWeight: 400,
+    lineHeight: 1.05,
+    letterSpacing: "-0.02em",
+    margin: 0,
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "baseline",
+    gap: 10,
+  },
+  wbTitleHebrew: {
+    fontFamily: FONT_HEBREW,
+    fontWeight: 500,
+  },
+  wbTitleDivider: {
+    color: "var(--accent)",
+  },
+  wbTitleEnglish: {
+    fontStyle: "italic",
+    color: "var(--ink-soft)",
+  },
+  wbSub: {
+    marginTop: 14,
+    fontSize: 14,
+    color: "var(--ink-soft)",
+    lineHeight: 1.5,
+    maxWidth: 480,
+  },
+  wbSection: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 12,
+  },
+  wbForm: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 14,
+    padding: "20px",
+    background: "var(--paper-deep)",
+    border: "1px solid var(--line)",
+    borderRadius: 10,
+  },
+  wbField: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 6,
+  },
+  wbLabel: {
+    fontSize: 11,
+    color: "var(--muted)",
+    textTransform: "uppercase",
+    letterSpacing: "0.1em",
+    fontWeight: 600,
+  },
+  wbInput: {
+    width: "100%",
+    padding: "10px 14px",
+    background: "var(--paper)",
+    border: "1px solid var(--line)",
+    borderRadius: 6,
+    fontSize: 16,
+    fontFamily: FONT_BODY,
+    color: "var(--ink)",
+    outline: "none",
+  },
+  wbInputHe: {
+    fontFamily: FONT_HEBREW,
+    fontSize: 20,
+    textAlign: "right",
+  },
+  wbCatRow: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 6,
+  },
+  wbCatPill: {
+    padding: "6px 12px",
+    background: "var(--paper)",
+    border: "1px solid var(--line)",
+    borderRadius: 999,
+    fontSize: 12,
+    fontWeight: 500,
+    cursor: "pointer",
+    color: "var(--ink-soft)",
+    fontFamily: FONT_BODY,
+    transition: "all 0.15s ease",
+  },
+  wbCatPillActive: {
+    background: "var(--ink)",
+    color: "var(--paper)",
+    borderColor: "var(--ink)",
+  },
+  wbAddBtn: {
+    marginTop: 4,
+    padding: "12px 18px",
+    background: "var(--ink)",
+    color: "var(--paper)",
+    border: "none",
+    borderRadius: 6,
+    fontSize: 14,
+    fontWeight: 500,
+    cursor: "pointer",
+    fontFamily: FONT_DISPLAY,
+    letterSpacing: "-0.01em",
+  },
+  wbAddBtnDisabled: {
+    opacity: 0.4,
+    cursor: "not-allowed",
+  },
+  wbEmpty: {
+    padding: "24px",
+    textAlign: "center",
+    color: "var(--muted)",
+    fontSize: 14,
+    fontStyle: "italic",
+    fontFamily: FONT_DISPLAY,
+    background: "var(--paper-deep)",
+    border: "1px dashed var(--line)",
+    borderRadius: 8,
+  },
+  wbGroupList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 20,
+  },
+  wbGroup: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 6,
+  },
+  wbGroupLabel: {
+    fontSize: 11,
+    color: "var(--accent-deep)",
+    textTransform: "uppercase",
+    letterSpacing: "0.1em",
+    fontWeight: 600,
+    paddingBottom: 4,
+  },
+  wbList: {
+    display: "flex",
+    flexDirection: "column",
+    border: "1px solid var(--line)",
+    borderRadius: 8,
+    overflow: "hidden",
+  },
+  wbRow: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr auto",
+    alignItems: "center",
+    gap: 12,
+    padding: "10px 14px",
+    background: "var(--paper-deep)",
+    borderBottom: "1px solid var(--line)",
+  },
+  wbRowHe: {
+    fontFamily: FONT_HEBREW,
+    fontSize: 17,
+    fontWeight: 500,
+    textAlign: "right",
+  },
+  wbRowEn: {
+    fontSize: 14,
+    color: "var(--ink-soft)",
+    fontFamily: FONT_DISPLAY,
+    fontStyle: "italic",
+  },
+  wbDeleteBtn: {
+    width: 28,
+    height: 28,
+    background: "transparent",
+    border: "1px solid var(--line)",
+    borderRadius: "50%",
+    color: "var(--muted)",
+    cursor: "pointer",
+    fontSize: 12,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 0,
+  },
+};
+
+
+// Mount the app
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(React.createElement(App));
+
+  </script>
+</body>
+</html>
